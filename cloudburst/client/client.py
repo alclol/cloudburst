@@ -273,7 +273,11 @@ class CloudburstConnection():
         self.func_call_sock.send(call.SerializeToString())
 
         r = GenericResponse()
-        r.ParseFromString(self.func_call_sock.recv())
+        str = self.func_call_sock.recv()
+        print(f'recv={str}')
+        print(f'={r}')
+        # r.ParseFromString(self.func_call_sock.recv())
+        r.ParseFromString(str)
 
         self.rid += 1
         print("r=", r)

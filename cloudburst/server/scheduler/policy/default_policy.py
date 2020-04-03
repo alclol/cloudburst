@@ -88,14 +88,19 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
         # Construct a map which maps from IP addresses to the number of
         # relevant arguments they have cached. For the time begin, we will
         # just pick the machine that has the most number of keys cached.
+        print(f'Pick executor?? ')
         arg_map = {}
 
+        print(f'func_locations?? {self.function_locations}')
         if function_name:
+            print(f'Func name= {function_name}')
             executors = set(self.function_locations[function_name])
         else:
+            print(f'unpinned_executors? = {self.unpinned_executors}')
             executors = set(self.unpinned_executors)
 
         for executor in self.backoff:
+            print(f'to discard? {executor}')
             executors.discard(executor)
 
         # Generate a list of all the keys in the system; if any of these nodes
@@ -104,6 +109,7 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
         for key in self.running_counts:
             if (len(self.running_counts[key]) > 1000 and sys_random.random() >
                     self.random_threshold):
+                print(f'?? {len(self.running_counts[key])}')
                 executors.discard(key)
 
         if len(executors) == 0:

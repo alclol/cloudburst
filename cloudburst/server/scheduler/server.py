@@ -64,7 +64,6 @@ logging.basicConfig(filename='log_scheduler.txt', level=logging.INFO,
 
 
 def scheduler(ip, mgmt_ip, route_addr, metric_addr):
-
     # If the management IP is not set, we are running in local mode.
     local = (mgmt_ip is None)
     kvs = AnnaTcpClient(route_addr, ip, local=local)
@@ -147,16 +146,18 @@ def scheduler(ip, mgmt_ip, route_addr, metric_addr):
 
     while True:
         socks = dict(poller.poll(timeout=1000))
-
         if connect_socket in socks and socks[connect_socket] == zmq.POLLIN:
             msg = connect_socket.recv_string()
+            print(f'socket str = {msg}')
             connect_socket.send_string(route_addr)
 
         if (func_create_socket in socks and
                 socks[func_create_socket] == zmq.POLLIN):
+            print(f'socket str = {func_create_socket}')
             create_function(func_create_socket, kvs)
 
         if func_call_socket in socks and socks[func_call_socket] == zmq.POLLIN:
+            print(f'socket str = {func_call_socket}')
             call_function(func_call_socket, pusher_cache, policy)
 
         if (dag_create_socket in socks and socks[dag_create_socket]
