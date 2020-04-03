@@ -35,7 +35,7 @@ sys_random = random.SystemRandom()
 class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
 
     def __init__(self, pin_accept_socket, pusher_cache, kvs_client, ip,
-                 random_threshold=0.20):
+                 random_threshold=0.20, local=False):
         # This scheduler's IP address.
         self.ip = ip
 
@@ -79,6 +79,9 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
 
         self.unique_executors = set()
 
+        # Indicates if we are running in local mode
+        self.local = local
+
     def get_unique_executors(self):
         count = len(self.unique_executors)
         self.unique_executors = set()
@@ -88,19 +91,14 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
         # Construct a map which maps from IP addresses to the number of
         # relevant arguments they have cached. For the time begin, we will
         # just pick the machine that has the most number of keys cached.
-        print(f'Pick executor?? ')
         arg_map = {}
 
-        print(f'func_locations?? {self.function_locations}')
         if function_name:
-            print(f'Func name= {function_name}')
             executors = set(self.function_locations[function_name])
         else:
-            print(f'unpinned_executors? = {self.unpinned_executors}')
             executors = set(self.unpinned_executors)
 
         for executor in self.backoff:
-            print(f'to discard? {executor}')
             executors.discard(executor)
 
         # Generate a list of all the keys in the system; if any of these nodes
@@ -109,7 +107,6 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
         for key in self.running_counts:
             if (len(self.running_counts[key]) > 1000 and sys_random.random() >
                     self.random_threshold):
-                print(f'?? {len(self.running_counts[key])}')
                 executors.discard(key)
 
         if len(executors) == 0:
@@ -157,7 +154,7 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
 
         # Remove this IP/tid pair from the system's metadata until it notifies
         # us that it is available again, but only do this for non-DAG requests.
-        if not function_name:
+        if not self.local and not function_name:
             self.unpinned_executors.discard(max_ip)
 
         self.unique_executors.add(max_ip)
@@ -196,8 +193,10 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
             # Do not use this executor either way: If it rejected, it has
             # something else pinned, and if it accepted, it has pinned what we
             # just asked it to pin.
-            self.unpinned_executors.discard((node, tid))
-            candidates.discard((node, tid))
+            # In local model allow executors to have multiple functions pinned
+            if not self.local:
+                self.unpinned_executors.discard((node, tid))
+                candidates.discard((node, tid))
 
             if response.success:
                 # The pin operation succeeded, so we return the node and thread
@@ -247,7 +246,6 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
         key = (status.ip, status.tid)
         logging.info('Received status update from executor %s:%d.' %
                      (key[0], int(key[1])))
-
         # This means that this node is currently departing, so we remove it
         # from all of our metadata tracking.
         if not status.running:

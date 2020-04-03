@@ -49,6 +49,7 @@ def exec_function(exec_socket, kvs, user_library, cache, function_cache):
     if call.name in function_cache:
         f = function_cache[call.name]
     else:
+        logging.info(f" Line52 util retrieve function {user_library}")
         f = utils.retrieve_function(call.name, kvs, user_library, call.consistency)
 
     if not f:
@@ -64,7 +65,7 @@ def exec_function(exec_socket, kvs, user_library, cache, function_cache):
                 logging.info('Finished executing %s: %s!' % (call.name,
                                                              str(result)))
             else:
-                dependencies = {}
+            
                 result = _exec_func_causal(kvs, f, fargs, user_library,
                                            dependencies=dependencies)
         except Exception as e:

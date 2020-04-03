@@ -32,7 +32,6 @@ serializer = Serializer()
 
 def call_function(func_call_socket, pusher_cache, policy):
     # Parse the received protobuf for this function call.
-    print(f'Server call function!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     call = FunctionCall()
     call.ParseFromString(func_call_socket.recv())
 
@@ -41,13 +40,11 @@ def call_function(func_call_socket, pusher_cache, policy):
     if not call.response_key:
         call.response_key = str(uuid.uuid4())
 
-    print(f'response_key = {call.response_key}')
     # Filter the arguments for CloudburstReferences, and use the policy engine to
     # pick a node for this request.
     refs = list(filter(lambda arg: type(arg) == CloudburstReference,
         map(lambda arg: serializer.load(arg),
             call.arguments.values)))
-    print(f" Server pick executor {refs}")
     result = policy.pick_executor(refs)
 
     response = GenericResponse()
@@ -94,6 +91,7 @@ def call_dag(call, pusher_cache, dags, policy):
 
         result = policy.pick_executor(refs, fname)
         if result is None:
+            logging.info(f'executor not found for args={args}, res={refs}')
             response = GenericResponse()
             response.success = False
             response.error = NO_RESOURCES

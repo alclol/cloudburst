@@ -140,7 +140,7 @@ class CloudburstConnection():
         if resp.success:
            return CloudburstFunction(name, self, self.kvs_client)
         else:
-           raise RuntimeError(f'Unexpected error while registering function: \n\t{resp}.')
+           raise RuntimeError(f'Unexpected error while registering function: {resp}.')
 
     def register_dag(self, name, functions, connections):
         '''
@@ -203,8 +203,11 @@ class CloudburstConnection():
             dc.client_id = client_id
 
         for fname in arg_map:
+            fname_args = arg_map[fname]
+            if type(fname_args) != list:
+                fname_args = [fname_args]
             args = [serializer.dump(arg, serialize=False) for arg in
-                    arg_map[fname]]
+                    fname_args]
             al = dc.function_args[fname]
             al.values.extend(args)
 
@@ -274,13 +277,10 @@ class CloudburstConnection():
 
         r = GenericResponse()
         str = self.func_call_sock.recv()
-        print(f'recv={str}')
-        print(f'={r}')
         # r.ParseFromString(self.func_call_sock.recv())
         r.ParseFromString(str)
 
         self.rid += 1
-        print("r=", r)
         return r.response_id
 
     def _connect(self):
