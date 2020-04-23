@@ -118,7 +118,12 @@ def _run_function(func, refs, args, user_lib):
         else:
             func_args += (arg,)
 
-    return func(*func_args)
+    res = func(*func_args)
+    logging.info(f'Calling function: func = {func}, arg = {func_args} result = {res}')
+    if res is None:
+        logging.info("ATTTTTTTTTTTTTTTTTTTTTTTTENTION: Returning NONE")
+
+    return res
 
 
 def _resolve_ref_normal(refs, kvs, cache):

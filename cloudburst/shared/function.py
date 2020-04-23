@@ -14,6 +14,7 @@
 
 from cloudburst.shared.future import CloudburstFuture
 from cloudburst.shared.serializer import Serializer
+import logging
 
 serializer = Serializer()
 
@@ -27,6 +28,11 @@ class CloudburstFunction():
     def __call__(self, *args):
         obj_id = self._conn.exec_func(self.name, args)
         if obj_id is None or len(obj_id) == 0:
+            logging.info(f"ATTTTTTTTTTTTTTTTTTTTENTION!!!! RETURNING NONE: function={self.name}, args={args}")
             return None
 
-        return CloudburstFuture(obj_id, self._kvs_client, serializer)
+        res = CloudburstFuture(obj_id, self._kvs_client, serializer)
+        if res is None:
+            logging.info(f"ATTTTTTTTTTTTTTTTTTTTENTION!!!! FUNCTION RETURNS NONE: function={self.name}, args={args}")
+
+        return res
