@@ -46,6 +46,7 @@ def call_function(func_call_socket, pusher_cache, policy):
                        map(lambda arg: serializer.load(arg),
                            call.arguments.values)))
     result = policy.pick_executor(refs)
+    raise RuntimeError(f'No executor found??? ')
 
     response = GenericResponse()
     if result is None:

@@ -91,6 +91,8 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
         # Construct a map which maps from IP addresses to the number of
         # relevant arguments they have cached. For the time begin, we will
         # just pick the machine that has the most number of keys cached.
+#        return "127.0.0.1"
+
         arg_map = {}
 
         if function_name:
@@ -110,7 +112,7 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
                 executors.discard(key)
 
         if len(executors) == 0:
-            return None
+            raise RuntimeError(f'No resource! {references}')
 
         executor_ips = set([e[0] for e in executors])
 
@@ -158,6 +160,7 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
             self.unpinned_executors.discard(max_ip)
 
         self.unique_executors.add(max_ip)
+#        print(f' executor should be: {max_ip}')
         return max_ip
 
     def pin_function(self, dag_name, function_name):

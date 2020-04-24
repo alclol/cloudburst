@@ -277,6 +277,8 @@ class CloudburstConnection():
 
         r = GenericResponse()
         r.ParseFromString(self.func_call_sock.recv())
+        if r.response_id is None or len(r.response_id) == 0:
+            raise RuntimeError(f'Got None fomr execfun??? : {r}.')
 
         self.rid += 1
         return r.response_id
