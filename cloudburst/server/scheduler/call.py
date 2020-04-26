@@ -90,6 +90,7 @@ def call_dag(call, pusher_cache, dags, policy):
                            map(lambda arg: serializer.load(arg), args)))
 
         result = policy.pick_executor(refs, fname)
+
         if result is None:
             response = GenericResponse()
             response.success = False
