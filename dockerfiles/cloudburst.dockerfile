@@ -42,11 +42,23 @@ WORKDIR /
 # better way to do package management for Python.
 RUN pip3 install tensorflow==1.12.0 tensorboard==1.12.2 scikit-image
 
-COPY start-cloudburst.sh /start-cloudburst.sh
+COPY dockerfiles/start-cloudburst.sh /start-cloudburst.sh
 
 RUN pip3 install pandas s3fs 
 
 RUN touch a
 RUN pip3 install --upgrade git+https://github.com/devin-petersohn/modin@engines/cloudburst_init
 
+# install modin
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN sudo apt-get install -y python3.6-dev
+
+WORKDIR $HYDRO_HOME
+RUN git clone https://github.com/alclol/modin.git
+
+WORKDIR $HYDRO_HOME/modin
+RUN pip3 install -r requirements.txt
+
+# ENTRYPOINT
+WORKDIR /
 CMD bash start-cloudburst.sh
