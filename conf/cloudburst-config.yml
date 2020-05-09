@@ -1,0 +1,6 @@
+ip: 172.20.42.47
+mgmt_ip: 100.96.1.5
+executor:
+    thread_id: 1
+    scheduler_ips:
+        - 172.20.54.6

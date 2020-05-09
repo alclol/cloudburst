@@ -142,10 +142,14 @@ class CloudburstConnection():
 
         resp = GenericResponse()
         resp.ParseFromString(self.func_create_sock.recv())
+        
 
         if resp.success:
-            return CloudburstFunction(name, self, self.kvs_client)
+            res = CloudburstFunction(name, self, self.kvs_client)
+            logging.info(f'Register function, return {res}. ')
+            return res
         else:
+            logging.error(f'Unexpected error while registering function: {resp}.')
             raise RuntimeError(f'Unexpected error while registering function: {resp}.')
 
     def register_dag(self, name, functions, connections, gpu_functions=[],
