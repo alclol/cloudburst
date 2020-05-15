@@ -175,8 +175,8 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
 
         # Remove this IP/tid pair from the system's metadata until it notifies
         # us that it is available again, but only do this for non-DAG requests.
-        if not self.local and not function_name:
-            self.unpinned_cpu_executors.discard(max_ip)
+        #if not self.local and not function_name:
+        #    self.unpinned_cpu_executors.discard(max_ip)
 
         if not max_ip:
             logging.error('No available executors.')
